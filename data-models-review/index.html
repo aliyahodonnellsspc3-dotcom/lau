@@ -46,9 +46,14 @@
 #test-decisions code{white-space:normal;overflow-wrap:anywhere}
 #test-decisions summary{cursor:pointer}
 
+.material-links{display:flex;align-items:center;flex-wrap:wrap;gap:.4rem 1.2rem;font-size:14px}
+.material-links[hidden]{display:none}.material-links a{color:#225c51;text-decoration:underline;text-underline-offset:.18em;line-height:1.8}.material-links a:focus-visible{outline:2px solid #326b60;outline-offset:2px}
+.main-materials{padding:8px max(4vw,20px);background:#e9f0eb;border-bottom:1px solid #cbdad0}
+#planning-files{padding:8px 12px;background:#edf5f2;border-radius:5px;margin:0 0 1rem}
 </style></head><body><header><div><h1>数据模型与决策</h1><small>期末复习 · 课堂考点与作业答案</small></div><div class="meter"><span id="progress"></span><div class="track"><i id="bar"></i></div></div></header>
+<nav class="material-links main-materials" aria-label="复习资料目录"><a href="#planning-15">线性与整数规划课堂原题</a><a href="./planning-sourcebook.pdf" target="_blank" rel="noopener">完整原题册（PDF）</a><a href="./mock-a/index.html">模拟卷 A · 在线作答</a></nav>
 <main><button class="mobile" id="menu">考点目录与筛选</button><aside class="side" id="side"><h2>考点目录</h2><div class="filters"><input type="search" id="search" placeholder="搜索考点、题号或案例" aria-label="搜索考点、题号或案例"><select id="src" aria-label="按作业筛选"><option value="">全部作业</option><option>第一次个人作业</option><option>第二次个人作业</option><option>Rogers 小组作业</option></select><select id="status" aria-label="按复习状态筛选"><option value="">全部状态</option><option value="wrong">我的错题</option><option value="done">已掌握</option><option value="todo">待掌握</option><option value="note">有笔记</option></select></div><nav id="list" aria-label="考点列表"></nav></aside>
-<article class="sheet"><div id="warn" role="status"></div><div id="empty" hidden><h2>没有符合条件的考点</h2><button id="reset">查看全部考点</button></div><div id="body"><div class="eyebrow" id="group"></div><h2 id="title" class="title"></h2><div class="sub" id="meta"></div><div class="tabs" id="tabs"><button data-tab="quiz">做题与核对</button><button data-tab="slide">原题纲</button><button data-tab="key">教师原件</button></div><section id="quiz"><h3 id="qname"></h3><div class="problem"><p id="scene"></p><p class="ask" id="ask"></p></div><div id="triQuizSlot"></div><section id="triLesson" hidden aria-labelledby="triTitle">
+<article class="sheet"><div id="warn" role="status"></div><div id="empty" hidden><h2>没有符合条件的考点</h2><button id="reset">查看全部考点</button></div><div id="body"><div class="eyebrow" id="group"></div><h2 id="title" class="title"></h2><div class="sub" id="meta"></div><div class="tabs" id="tabs"><button data-tab="quiz">做题与核对</button><button data-tab="slide">原题纲</button><button data-tab="key">教师原件</button></div><nav id="planning-files" class="material-links" aria-label="本考点原题与解答" hidden><a data-pdf-part="case" target="_blank" rel="noopener">本题题面 PDF</a><a data-pdf-part="model" target="_blank" rel="noopener">课堂模型解答</a><a data-pdf-part="homework" target="_blank" rel="noopener">对应作业原件</a><a data-pdf-part="answer" target="_blank" rel="noopener">教师作业答案</a></nav><section id="quiz"><h3 id="qname"></h3><div class="problem"><p id="scene"></p><p class="ask" id="ask"></p></div><div id="triQuizSlot"></div><section id="triLesson" hidden aria-labelledby="triTitle">
 <h3 id="triTitle">三角分布怎样生成一个对手的报价？</h3>
 <p>横轴是报价，纵轴是概率密度。图顶是最可能的报价；同样宽的一段报价区间，曲线下的面积越大，越容易抽到。拖动三个圆点可以改变分布，拖动下方滑块可以改变一次抽样。</p>
 <svg id="triPlot" viewBox="0 0 660 250" role="group" aria-label="可拖动的三角分布。三个圆点分别调整最低、最可能和最高报价，可用左右方向键微调。">
@@ -458,6 +463,14 @@ function refreshPlanningLesson(panel,topic){
 
 function showPlanningLesson(topic,activeTab){
   const n=Number(topic);
+  const files = document.getElementById('planning-files');
+  const pages = {15:[1,8,5,10],16:[2,8,6,11],17:[3,9,6,12],18:[4,8,6,13]}[n];
+  files.hidden = !pages;
+  if (pages) {
+    for (const [i, link] of Array.from(files.querySelectorAll('a')).entries()) {
+      link.href = './planning-sourcebook.pdf#page=' + pages[i];
+    }
+  }
   let panel=document.getElementById('planning-lesson');
   if(n<15||n>18||!Number.isInteger(n)){if(panel)panel.remove();return}
   const host=document.getElementById(activeTab==='quiz'?'quiz':'original');
@@ -1665,5 +1678,7 @@ $('enlarge').onclick=()=>{$('zoomTitle').textContent=$('docTitle').textContent;$
 if (location.hash === '#normal-shape' || location.hash === '#test-decisions') requestAnimationFrame(() => document.getElementById(location.hash.slice(1))?.scrollIntoView());
 function scrollToPlanningCase(){requestAnimationFrame(() => document.getElementById(location.hash.slice(1))?.scrollIntoView())}
 if(planningHashTopic())scrollToPlanningCase();
-window.addEventListener('hashchange',()=>{const n=planningHashTopic();if(!n)return;$('search').value='';$('src').value='';$('status').value='';tab='quiz';id=n;filter();scrollToPlanningCase()});
+function openPlanningHash(){const n=planningHashTopic();if(!n)return;$('search').value='';$('src').value='';$('status').value='';$('side').classList.remove('open');tab='quiz';id=n;filter();scrollToPlanningCase()}
+window.addEventListener('hashchange', openPlanningHash);
+document.querySelector('.main-materials a[href="#planning-15"]').addEventListener('click',event=>{if(location.hash==='#planning-15'){event.preventDefault();openPlanningHash()}});
 </script></body></html>
